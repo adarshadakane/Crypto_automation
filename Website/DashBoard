@@ -1,1 +1,757 @@
 
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Crypto Currency</title>
+    <link rel="stylesheet" href="style.css" />
+    <script defer src="script.js"></script>
+  </head>
+  <body>
+    <div class="login-container">
+      <div class="login-wrapper">
+        <h2 class="login-title">Crypto</h2>
+        <form class="login-form" id="loginForm">
+          <div class="form-group">
+            <label for="username">Username</label>
+            <input
+              type="text"
+              id="username"
+              class="form-control"
+              placeholder="Enter username"
+              required
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="password">Password</label>
+            <input
+              type="password"
+              id="password"
+              class="form-control"
+              placeholder="Enter password"
+              required
+            />
+          </div>
+
+          <button type="submit" class="login-button">Sign In</button>
+        </form>
+      </div>
+    </div>
+
+    <div class="dashboard">
+      <div class="dashboard-header">
+        <h1>Crypto Currency</h1>
+        <div class="market-summary">
+          <div class="summary-card">
+            <h3>Crypto Market Cap</h3>
+            <p class="summary-value" id="totalMarketCap">Loading...</p>
+          </div>
+          <div class="summary-card">
+            <h3>Top Gainer</h3>
+            <p class="summary-value" id="topGainer">Loading...</p>
+          </div>
+          <div class="summary-card">
+            <h3>Market Status</h3>
+            <p class="summary-value" id="marketStatus">Loading...</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="movements-container">
+        <div class="movements-header">
+          <div class="toggle-buttons">
+            <button class="toggle-btn active" data-type="crypto">
+              Cryptocurrencies (10)
+            </button>
+            <button class="toggle-btn" data-type="stock">
+              Nifty Stocks (10)
+            </button>
+          </div>
+          <div class="last-updated" id="lastUpdated"></div>
+        </div>
+
+        <div class="stats-grid" id="statsGrid"></div>
+
+        <div class="movements-list"></div>
+      </div>
+    </div>
+  </body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: "Arial", sans-serif;
+  margin: 0;
+  background-color: #f8f9fa;
+  color: #333;
+}
+
+.login-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  padding: 20px;
+}
+
+.login-wrapper {
+  background: white;
+  padding: 30px;
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 350px;
+  transition: opacity 0.3s ease-in-out;
+}
+
+.login-wrapper.hide {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.login-title {
+  margin-bottom: 25px;
+  color: #2c3e50;
+  font-size: 1.8rem;
+}
+
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 500;
+}
+
+.form-control {
+  width: 100%;
+  padding: 12px;
+  border: 2px solid #e0e0e0;
+  border-radius: 6px;
+  font-size: 16px;
+  transition: border-color 0.3s ease;
+}
+
+.form-control:focus {
+  border-color: #007bff;
+  outline: none;
+}
+
+.login-button {
+  padding: 12px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.login-button:hover {
+  background-color: #0056b3;
+}
+
+.dashboard {
+  display: none;
+  width: 95%;
+  max-width: 1200px;
+  margin: 20px auto;
+  padding: 25px;
+  background: white;
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  opacity: 0;
+  transition: opacity 0.5s ease-in-out;
+}
+
+.dashboard.show {
+  display: block;
+  opacity: 1;
+}
+
+.movements-container {
+  margin-top: 30px;
+  padding: 25px;
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.movements-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 25px;
+}
+
+.toggle-buttons {
+  display: flex;
+  gap: 15px;
+}
+
+.toggle-btn {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 6px;
+  background: #e0e0e0;
+  color: #666;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.toggle-btn.active {
+  background: #007bff;
+  color: white;
+}
+
+.movements-list {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.movement-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 18px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+}
+
+.movement-type {
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+.movement-value {
+  font-weight: 600;
+  color: #2c3e50;
+}
+
+.movement-date {
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.chart-container {
+  margin-top: 30px;
+  padding: 25px;
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.graph-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.graph-container {
+  background: #fff;
+  padding: 30px;
+  border-radius: 12px;
+  max-width: 90%;
+  position: relative;
+}
+
+.close-graph {
+  position: absolute;
+  top: 15px;
+  right: 20px;
+  background: transparent;
+  border: none;
+  font-size: 24px;
+  color: #666;
+  cursor: pointer;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .dashboard {
+    width: 100%;
+    padding: 15px;
+  }
+
+  .movement-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .toggle-buttons {
+    flex-wrap: wrap;
+  }
+
+  .graph-container {
+    padding: 15px;
+  }
+}
+
+@media (max-width: 480px) {
+  .login-wrapper {
+    padding: 20px;
+  }
+
+  .form-control {
+    padding: 10px;
+  }
+}
+
+.movement-row {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr;
+  align-items: center;
+  padding: 15px;
+  margin-bottom: 10px;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.movement-change {
+  font-weight: bold;
+  text-align: right;
+}
+
+.positive {
+  color: #00c853;
+}
+
+.negative {
+  color: #ff1744;
+}
+
+.movement-type {
+  font-weight: 600;
+  color: #2d3436;
+}
+
+.movement-value {
+  text-align: center;
+  color: #636e72;
+}
+
+.dashboard-header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.dashboard-header h1 {
+  color: #2c3e50;
+  margin-bottom: 1rem;
+}
+
+.market-summary {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.summary-card {
+  background: #fff;
+  padding: 1.5rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+}
+
+.summary-card h3 {
+  margin-bottom: 0.5rem;
+  color: #636e72;
+}
+
+.summary-value {
+  font-size: 1.4rem;
+  font-weight: 600;
+  color: #2d3436;
+}
+
+/* Stats Grid */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.stat-card {
+  background: #fff;
+  padding: 1rem;
+  border-radius: 8px;
+  text-align: center;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.stat-price {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin: 0.5rem 0;
+}
+
+.stat-change {
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.movement-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  margin-bottom: 0.5rem;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.asset-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.asset-name {
+  font-weight: 600;
+  color: #2d3436;
+}
+
+.asset-symbol {
+  font-size: 0.9rem;
+  color: #636e72;
+}
+
+.price-info {
+  text-align: right;
+}
+
+.price {
+  font-weight: 600;
+  color: #2d3436;
+}
+
+.change {
+  font-size: 0.9rem;
+}
+
+.last-updated {
+  text-align: right;
+  color: #636e72;
+  font-size: 0.9rem;
+  margin-top: 0.5rem;
+}
+
+.positive {
+  color: #00b894;
+}
+.negative {
+  color: #d63031;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+document.addEventListener("DOMContentLoaded", () => {
+  const config = {
+    account: { owner: "adi", pin: 4321 },
+    cryptoIds: [
+      "bitcoin",
+      "ethereum",
+      "binancecoin",
+      "ripple",
+      "cardano",
+      "solana",
+      "dogecoin",
+      "polkadot",
+      "shiba-inu",
+      "litecoin",
+    ],
+    stockSymbols: [
+      "RELIANCE.NS",
+      "TCS.NS",
+      "HDFCBANK.NS",
+      "INFY.NS",
+      "HINDUNILVR.NS",
+      "ICICIBANK.NS",
+      "KOTAKBANK.NS",
+      "AXISBANK.NS",
+      "ITC.NS",
+      "SBIN.NS",
+    ],
+    refreshInterval: 60000,
+  };
+
+  const state = {
+    cryptoData: [],
+    stockData: [],
+    currentView: "crypto",
+    exchangeRate: 1,
+  };
+
+  function init() {
+    setupEventListeners();
+  }
+
+  function setupEventListeners() {
+    document
+      .getElementById("loginForm")
+      .addEventListener("submit", handleLogin);
+    document.querySelectorAll(".toggle-btn").forEach((btn) => {
+      btn.addEventListener("click", handleViewToggle);
+    });
+  }
+
+  async function handleLogin(e) {
+    e.preventDefault();
+    const username = document.getElementById("username").value;
+    const password = document.getElementById("password").value;
+
+    if (
+      username === config.account.owner &&
+      Number(password) === config.account.pin
+    ) {
+      document.querySelector(".login-container").style.display = "none";
+      document.querySelector(".dashboard").classList.add("show");
+
+      try {
+        await loadInitialData();
+        setupAutoRefresh();
+      } catch (error) {
+        showError("Failed to load market data");
+      }
+    } else {
+      showError("Invalid credentials");
+    }
+  }
+
+  async function loadInitialData() {
+    state.cryptoData = await fetchCryptoData();
+    state.stockData = await fetchStockData();
+    updateMarketSummary();
+    renderView();
+    updateLastUpdated();
+  }
+
+  async function fetchCryptoData() {
+    try {
+      const response = await fetch(
+        `https://api.coingecko.com/api/v3/coins/markets?vs_currency=inr&ids=${config.cryptoIds.join(
+          ","
+        )}`
+      );
+      const data = await response.json();
+      return data.map((coin) => ({
+        name: coin.name,
+        symbol: coin.symbol.toUpperCase(),
+        price: coin.current_price,
+        change: coin.price_change_percentage_24h,
+        market_cap: coin.market_cap,
+      }));
+    } catch (error) {
+      console.error("Crypto fetch error:", error);
+      return [];
+    }
+  }
+
+  async function fetchStockData() {
+    try {
+      const response = await fetch(
+        `https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=${config.stockSymbols.join(
+          ","
+        )}&apikey=`
+      );
+      //yaha api generate karna alphavantage mein se easily ho jayengi
+      const data = await response.json();
+      return data["Global Quotes"].map((stock) => ({
+        symbol: stock["01. symbol"].replace(".NS", ""),
+        price: parseFloat(stock["05. price"]),
+        change: parseFloat(stock["10. change percent"].replace("%", "")),
+      }));
+    } catch (error) {
+      console.error("Stock fetch error:", error);
+      return [];
+    }
+  }
+
+  function updateMarketSummary() {
+    if (state.cryptoData.length > 0) {
+      const totalMarketCap = state.cryptoData.reduce(
+        (sum, coin) => sum + coin.market_cap,
+        0
+      );
+      const topGainer = state.cryptoData.reduce(
+        (max, coin) => (coin.change > max.change ? coin : max),
+        state.cryptoData[0]
+      );
+
+      document.getElementById("totalMarketCap").textContent = `₹${(
+        totalMarketCap / 100000
+      ).toLocaleString("en-IN", { maximumFractionDigits: 0 })} Crore`;
+
+      document.getElementById("topGainer").innerHTML = `${
+        topGainer.name
+      }<br><span class="positive">+${topGainer.change.toFixed(1)}%</span>`;
+    }
+
+    document.getElementById("marketStatus").textContent =
+      new Date().toLocaleTimeString("en-IN", {
+        hour: "2-digit",
+        minute: "2-digit",
+      });
+  }
+
+  function renderView() {
+    const data =
+      state.currentView === "crypto" ? state.cryptoData : state.stockData;
+    updateMovementsList(data);
+    updateStatsGrid(data);
+  }
+
+  function updateMovementsList(data) {
+    const list = document.querySelector(".movements-list");
+    list.innerHTML = data
+      .map(
+        (item) => `
+          <div class="movement-row">
+              <div class="asset-info">
+                  <span class="asset-name">${item.name || item.symbol}</span>
+                  <span class="asset-symbol">${item.symbol}</span>
+              </div>
+              <div class="price-info">
+                  <span class="price">₹${item.price.toLocaleString(
+                    "en-IN"
+                  )}</span>
+                  <span class="change ${
+                    item.change >= 0 ? "positive" : "negative"
+                  }">
+                      ${item.change >= 0 ? "▲" : "▼"} ${Math.abs(
+          item.change
+        ).toFixed(2)}%
+                  </span>
+              </div>
+          </div>
+      `
+      )
+      .join("");
+  }
+
+  function updateStatsGrid(data) {
+    const grid = document.getElementById("statsGrid");
+    grid.innerHTML = data
+      .map(
+        (item) => `
+          <div class="stat-card">
+              <h4>${item.symbol}</h4>
+              <p class="stat-price">₹${item.price.toLocaleString("en-IN")}</p>
+              <p class="stat-change ${
+                item.change >= 0 ? "positive" : "negative"
+              }">
+                  ${item.change >= 0 ? "+" : ""}${item.change.toFixed(2)}%
+              </p>
+          </div>
+      `
+      )
+      .join("");
+  }
+
+  function updateLastUpdated() {
+    const now = new Date().toLocaleString("en-IN", {
+      hour: "numeric",
+      minute: "numeric",
+      second: "numeric",
+      hour12: true,
+    });
+    document.getElementById("lastUpdated").textContent = `Last Updated: ${now}`;
+  }
+
+  function handleViewToggle(e) {
+    document
+      .querySelectorAll(".toggle-btn")
+      .forEach((b) => b.classList.remove("active"));
+    e.target.classList.add("active");
+    state.currentView = e.target.dataset.type;
+    renderView();
+  }
+
+  function setupAutoRefresh() {
+    setInterval(async () => {
+      if (state.currentView === "crypto") {
+        state.cryptoData = await fetchCryptoData();
+      } else {
+        state.stockData = await fetchStockData();
+      }
+      updateMarketSummary();
+      renderView();
+      updateLastUpdated();
+    }, config.refreshInterval);
+  }
+
+  function showError(message) {
+    alert(`Error: ${message}`);
+  }
+
+  init();
+});
+
+
