@@ -1,71 +1,79 @@
 pipeline {
     agent any
+
     environment {
-        AWS_ACCESS_KEY_ID = credentials('AWS_ACCESS_KEY_ID')
-        AWS_SECRET_ACCESS_KEY = credentials('AWS_SECRET_ACCESS_KEY')
-        AWS_DEFAULT_REGION = "us-east-2"
+        IMAGE_NAME = 'xtrendence/cryptoshare'
+        CONTAINER_NAME = 'cryptoshare_container'
+        // SONARQUBE_CONTAINER = 'sonarqube_server'
+        // SONARQUBE_PORT = '9000'
+        PROJECT_PORT = '3190'
+        // SONARQUBE_URL = 'http://localhost:9000'
     }
+
     stages {
-        stage('Checkout SCM'){
-            steps{
-                script{
-                    checkout scmGit(branches: [[name: '*/main']], extensions: [], userRemoteConfigs: [[url: 'https://github.com/gauri17-pro/terraform-jenkins-eks.git']])
-                }
-            }
-        }
-        stage("Sonarqube Analysis") {
+        stage('Checkout SCM') {
             steps {
-                withSonarQubeEnv('SonarQube-Server') {
-                    sh '''$SCANNER_HOME/bin/sonar-scanner -Dsonar.projectName=Crpto_website \
-                    -Dsonar.projectKey=Crypto-website \
-		    -Dsonar.java.binaries=.  '''
-                }
+                git branch: 'main', url: 'https://github.com/Xtrendence/CryptoShare.git'
             }
         }
-         stage("Quality Gate") {
+
+        // stage('Start SonarQube Server') {
+        //     steps {
+        //         script {
+        //             sh """
+        //             docker ps -q --filter "name=${SONARQUBE_CONTAINER}" | grep -q . && echo "SonarQube is already running" || \
+        //             docker run -d --name ${SONARQUBE_CONTAINER} -p ${SONARQUBE_PORT}:9000 sonarqube:lts
+        //             """
+        //         }
+        //     }
+        // }
+
+        // stage('SonarQube Analysis') {
+        //     steps {
+        //         script {
+        //             withSonarQubeEnv('SonarQube') {
+        //                 sh """
+        //                 until curl -s ${SONARQUBE_URL} >/dev/null; do echo "Waiting for SonarQube..."; sleep 5; done
+        //                 sonar-scanner -Dsonar.projectKey=CryptoShare -Dsonar.sources=. -Dsonar.host.url=${SONARQUBE_URL}
+        //                 """
+        //             }
+        //         }
+        //     }
+        // }
+
+        stage('Build and Push Docker Image') {  // Renamed stage
             steps {
                 script {
-                    waitForQualityGate abortPipeline: false, credentialsId: 'SonarQube-Token'
+                    sh "docker pull ${IMAGE_NAME}"
                 }
             }
         }
-        stage('Install Dependencies') {
+
+        // stage('Stop Existing Container') {
+        //     steps {
+        //         script {
+        //             sh """
+        //             docker ps -q --filter "name=${CONTAINER_NAME}" | grep -q . && docker stop ${CONTAINER_NAME} || true
+        //             docker ps -a -q --filter "name=${CONTAINER_NAME}" | grep -q . && docker rm ${CONTAINER_NAME} || true
+        //             """
+        //         }
+        //     }
+        // }
+
+        stage('Run Docker Container') {
             steps {
-                sh "npm install"
+                script {
+                    sh "docker run -d --name ${CONTAINER_NAME} -p ${PROJECT_PORT}:${PROJECT_PORT} ${IMAGE_NAME}"
+                }
             }
         }
-        stage('TRIVY FS SCAN') {
-            steps {
-                sh "trivy fs . > trivyfs.txt"
-             }
-         }
-        stage("Build & Push Docker Image") {
-             steps {
-                 script {
-                     docker.withRegistry('',DOCKER_PASS) {
-                         docker_image.push("${IMAGE_TAG}")
-                         docker_image.push('latest')
-                     }
-                 }
-             }
-         }
-	    
-	 stage("Trivy Image Scan") {
-             steps {
-                 script {
-	              sh ('docker run -v /var/run/docker.sock:/var/run/docker.sock aquasec/trivy image adarshadakane/reddit-clone-pipeline:latest --no-progress --scanners vuln  --exit-code 0 --severity HIGH,CRITICAL --format table > trivyimage.txt')
-                 }
-             }
-         }
-	 stage ('Cleanup Artifacts') {
-             steps {
-                 script {
-                      sh "docker rmi ${IMAGE_NAME}:${IMAGE_TAG}"
-                      sh "docker rmi ${IMAGE_NAME}:latest"
-                 }
-             }
-         }
 
-
+        // stage('Show EC2 Public DNS') {
+        //     steps {
+        //         script {
+        //             sh "curl http://169.254.169.254/latest/meta-data/public-hostname"
+        //         }
+        //     }
+        // }
     }
 }
