@@ -13,7 +13,7 @@ pipeline {
     stages {
         stage('Checkout SCM') {
             steps {
-                git branch: 'main', url: 'https://github.com/Xtrendence/CryptoShare.git'
+                git branch: 'main', url: 'https://github.com/adarshadakane/Crypto_automation.git'
             }
         }
 
