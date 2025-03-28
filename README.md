@@ -3,4 +3,8 @@ In this Crypto Automation  project, We successfully deployed a Scalable Crypto W
 
 ![Workflow  of  our CI-CD job](workflowreal.jpg)
 
+
+
+
+
 ![Implementaion of CI-CD job](pipeline_run.jpg)
